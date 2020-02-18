@@ -35,34 +35,15 @@ export class Employee {
             return false
         }
 
-        if (this._birthDate == null) {
-            if (this._birthDate != null) {
-                return false
-            }
-        } else if (!this._birthDate.equals(obj._birthDate)) {
+        if (!this._birthDate.equals(obj._birthDate)) {
             return false
         }
-        if (this._email == null) {
-            if (obj._email != null) {
-                return false
-            }
-        } else if (this._email !== obj._email) {
+        if (this._email !== obj._email) {
             return false
         }
-        if (this._firstName == null) {
-            if (obj._firstName != null) {
-                return false
-            }
-        } else if (this._firstName !== obj._firstName) {
+        if (this._firstName !== obj._firstName) {
             return false
         }
-        if (this._lastName == null) {
-            if (obj._lastName != null) {
-                return false
-            }
-        } else if (this._lastName !== obj._lastName) {
-            return false
-        }
-        return true
+        return this._lastName === obj._lastName
     }
 }

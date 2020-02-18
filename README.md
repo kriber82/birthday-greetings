@@ -9,7 +9,11 @@ Esté el código inicial de la kata escrito en Typescript.
 
 ## Cómo empezar
 
-Para arrancar deberías descargarte este código.
+Para arrancar deberías descargarte este código e iniciarlo:
+
+```bash
+yarn
+```
 
 Para ejecutar los tests:
 

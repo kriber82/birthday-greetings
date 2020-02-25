@@ -1,46 +1,43 @@
 import { OurDate } from '../src/OurDate'
-import { BirthdayService, Message } from '../src/BirthdayService'
+import { BirthdayService } from '../src/BirthdayService'
+import { messagesSent, startMailhog, stopMailHog } from './mailhog'
+import flushPromises from 'flush-promises'
 
 describe('Acceptance', () => {
 
-    const SMTP_PORT = 25
-    const SMTP_URL = 'localhost'
-    let messagesSent: Message[]
+    const SMTP_PORT = 1025
+    const SMTP_URL = '127.0.0.1'
     let service: BirthdayService
 
-    beforeEach(() => {
-        messagesSent = []
+    beforeEach(async () => {
+        await startMailhog()
 
-        service = new class extends BirthdayService {
-            protected deliveryMessage(message: Message) {
-                messagesSent = messagesSent.concat(message)
-            }
-        }()
+        service = new BirthdayService()
     })
 
-    it('base scenario', () => {
-        service.sendGreetings('employee_data.txt', new OurDate('2008/10/08'), SMTP_URL, SMTP_PORT)
+    afterEach(() => {
+        stopMailHog()
+    })
 
-        expect(messagesSent.length).toEqual(1)
-        const message = messagesSent[0]
-        expect(message.text).toEqual('Happy Birthday, dear John!')
-        expect(message.subject).toEqual('Happy Birthday!')
-        const tos = message.to as string[]
+    it('base scenario', async () => {
+        service.sendGreetings('employee_data.txt', new OurDate('2008/10/08'), SMTP_URL, SMTP_PORT)
+        await flushPromises()
+
+        const messages = await messagesSent()
+        expect(messages.length).toEqual(1)
+        const message = messages[0]
+        expect(message.Content.Body).toEqual('Happy Birthday, dear John!')
+        expect(message.Content.Headers.Subject[0]).toEqual('Happy Birthday!')
+        const tos = message.Content.Headers.To as string[]
         expect(tos.length).toEqual(1)
         expect(tos[0]).toEqual('john.doe@foobar.com')
     })
 
-    it('will not send emails when nobodys birthday', () => {
+    it('will not send emails when nobodys birthday', async () => {
         service.sendGreetings('employee_data.txt', new OurDate('2008/01/01'), SMTP_URL, SMTP_PORT)
+        await flushPromises()
 
-        expect(messagesSent.length).toEqual(0)
-    })
-
-    it('uses correct transport', () => {
-        service.sendGreetings('employee_data.txt', new OurDate('2008/10/08'), SMTP_URL, SMTP_PORT)
-
-        const message = messagesSent[0]
-        expect(message.host).toEqual(SMTP_URL)
-        expect(message.port).toEqual(SMTP_PORT)
+        const messages = await messagesSent()
+        expect(messages.length).toEqual(0)
     })
 })

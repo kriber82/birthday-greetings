@@ -44,10 +44,10 @@ export class BirthdayService {
     }
 
     // made protected for testing :-(
-    protected deliveryMessage({host, port, ...msg}: Message) {
+    protected async deliveryMessage({host, port, ...msg}: Message) {
         const transport = nodemailer.createTransport({host, port})
 
-        transport.sendMail(msg)
+        await transport.sendMail(msg)
     }
 }
 

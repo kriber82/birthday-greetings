@@ -9,8 +9,8 @@ describe('Acceptance', () => {
     const SMTP_URL = '127.0.0.1'
     let service: BirthdayService
 
-    beforeEach(async () => {
-        await startMailhog()
+    beforeEach(() => {
+        startMailhog()
 
         service = new BirthdayService()
     })
@@ -28,7 +28,7 @@ describe('Acceptance', () => {
         const message = messages[0]
         expect(message.Content.Body).toEqual('Happy Birthday, dear John!')
         expect(message.Content.Headers.Subject[0]).toEqual('Happy Birthday!')
-        const tos = message.Content.Headers.To as string[]
+        const tos = message.Content.Headers.To
         expect(tos.length).toEqual(1)
         expect(tos[0]).toEqual('john.doe@foobar.com')
     })

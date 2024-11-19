@@ -8,7 +8,7 @@ import SMTPTransport from 'nodemailer/lib/smtp-transport'
 
 export class BirthdayService {
     sendGreetings(fileName: string, ourDate: OurDate, smtpHost: string, smtpPort: number) {
-        const data = fs.readFileSync(path.resolve(__dirname, `../resources/${fileName}`), 'UTF-8')
+        const data = fs.readFileSync(path.resolve(__dirname, `../resources/${fileName}`), 'utf-8')
 
         // split the contents by new line
         const lines = data.split(/\r?\n/)

@@ -16,11 +16,10 @@ export const startMailhog = () => {
 export const stopMailHog = () => {
     execSync('docker-compose stop')
     execSync('docker-compose rm -f')
-    execSync('sleep 1') // TODO slow & flaky
 }
 
 export const messagesSent = async (): Promise<Message[]> => new Promise(resolve => {
-    // TODO slow & flaky
+    // TODO slow & flaky?
     return setTimeout(async () => resolve((await fetch('http://127.0.0.1:8025/api/v1/messages')).json()), 500)
 })
 

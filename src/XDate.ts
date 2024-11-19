@@ -1,4 +1,4 @@
-export class OurDate {
+export class XDate {
 
     private _date: Date
 
@@ -14,11 +14,11 @@ export class OurDate {
         return 1 + this._date.getMonth()
     }
 
-    isSameDay(anotherDate: OurDate) {
+    isSameDay(anotherDate: XDate) {
         return anotherDate.getDay() === this.getDay() && anotherDate.getMonth() === this.getMonth()
     }
 
     equals(obj: object) {
-        return obj instanceof OurDate && obj._date.getTime() === this._date.getTime()
+        return obj instanceof XDate && obj._date.getTime() === this._date.getTime()
     }
 }

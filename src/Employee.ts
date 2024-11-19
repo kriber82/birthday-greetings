@@ -1,16 +1,16 @@
-import { OurDate } from './OurDate'
+import { XDate } from './XDate'
 
 export class Employee {
 
     private readonly _firstName: string
     private readonly _lastName: string
-    private readonly _birthDate: OurDate
+    private readonly _birthDate: XDate
     private readonly _email: string
 
     constructor(firstName: string, lastName: string, birthDate: string, email: string) {
         this._firstName = firstName
         this._lastName = lastName
-        this._birthDate = new OurDate(birthDate)
+        this._birthDate = new XDate(birthDate)
         this._email = email
     }
 
@@ -26,7 +26,7 @@ export class Employee {
         return this._email
     }
 
-    isBirthday(today: OurDate) {
+    isBirthday(today: XDate) {
         return today.isSameDay(this._birthDate)
     }
 

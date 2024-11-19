@@ -1,26 +1,26 @@
-# Birthday Greetings kata en Typescript
+# Birthday Greetings kata in Typescript
 
-Este es un ejercicio de refactoring dedicado a aprender sobre:
-- Inversión de dependencias e inyección de dependencias.
-- Separación de lógica de negocio e infraestructura.
-- Arquitectura hexagonal.
+This is a refactoring exercise dedicated to learning about:
 
-Esté el código inicial de la kata escrito en Typescript.
+Dependency inversion and dependency injection.
+Separation of business logic and infrastructure.
+Hexagonal architecture.
+The initial code for the kata is written in Typescript.
 
-## Cómo empezar
+# How to start
 
-Para arrancar deberías descargarte este código e iniciarlo:
-
+To get started, you should download this code and initialize it:
 ```bash
 yarn
 ```
 
-Para ejecutar los tests:
+To run the tests:
 
 ```bash
 yarn test
 ```
 
-## Créditos
+## Credits
 
-[Kata original](http://matteo.vaccari.name/blog/archives/154)
+- [TS version of the Kata](https://github.com/540/birthday-greetings-ts)
+- [Original Kata](http://matteo.vaccari.name/blog/archives/154)

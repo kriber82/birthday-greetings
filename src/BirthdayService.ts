@@ -7,49 +7,49 @@ import SMTPTransport from "nodemailer/lib/smtp-transport";
 import Mail from "nodemailer/lib/mailer";
 
 export class BirthdayService {
-    async sendGreetings(fileName: string, xDate: XDate, smtpHost: string, smtpPort: number) {
-        // read file
-        const data = fs.readFileSync(path.resolve(__dirname, `../resources/${fileName}`), 'utf-8')
-        const split = data.split(/\r?\n/)
+    async sendGreetings(employeeCsvFilename: string, today: XDate, smtpHost: string, smtpPort: number) {
+        const employeeCsvFileContent = fs.readFileSync(path.resolve(__dirname, `../resources/${employeeCsvFilename}`), 'utf-8')
+        const employeeCsvLines = employeeCsvFileContent.split(/\r?\n/)
 
-        for (let i = 0; i < split.length; i++) {
-            const str = split[i];
+        for (let i = 0; i < employeeCsvLines.length; i++) {
+            const employeeCsvLine = employeeCsvLines[i];
 
-            // handle header
-            if (i === 0) {
+            const skipCsvHeaderLine = i === 0;
+            if (skipCsvHeaderLine) {
                 continue
             }
 
             // parse csv record
-            const rec = str.split(', ')
-            const e = new Employee(rec[1], rec[0], rec[2], rec[3])
+            const employeeCsvFields = employeeCsvLine.split(', ')
+            const firstName = employeeCsvFields[1];
+            const lastName = employeeCsvFields[0];
+            const birthDate = employeeCsvFields[2];
+            const email = employeeCsvFields[3];
+            const employee = new Employee(firstName, lastName, birthDate, email)
 
-            // check if we need to send a birthday message
-            if (e.isBirthday(xDate)) {
-                // actually send birthday email
-                const body = 'Happy Birthday, dear %NAME%!'.replace('%NAME%', e.getFirstName())
-                await this.sendMessage(smtpHost, smtpPort, 'sender@here.com', 'Happy Birthday!', body, e.getEmail())
+            const shouldSendBirthdayMessage = employee.isBirthday(today);
+            if (shouldSendBirthdayMessage) {
+                const subject = 'Happy Birthday!';
+                const body = 'Happy Birthday, dear %NAME%!'.replace('%NAME%', employee.getFirstName())
+                const recipient = employee.getEmail();
+                await this.sendMessage(smtpHost, smtpPort, 'sender@here.com', subject, body, recipient)
             }
         }
     }
 
     async sendMessage(smtpHost: string, smtpPort: number, sender: string,
                       subject: string, body: string, recipient: string) {
+        const options: SMTPTransport.Options = {host: smtpHost, port: smtpPort}
+        const transport = nodemailer.createTransport(options)
 
-        // create a mail transport
-        const o: SMTPTransport.Options = {host: smtpHost, port: smtpPort}
-        const t = nodemailer.createTransport(o)
-
-        // construct the message
-        const msg: Mail.Options = {
+        const message: Mail.Options = {
             from: sender,
             to: [recipient],
             subject,
             text: body
         }
 
-        // send the message
-        await t.sendMail(msg)
+        await transport.sendMail(message)
     }
 
 }

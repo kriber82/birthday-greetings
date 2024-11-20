@@ -8,17 +8,27 @@ import Mail from "nodemailer/lib/mailer";
 
 export class BirthdayService {
     async sendGreetings(fileName: string, xDate: XDate, smtpHost: string, smtpPort: number) {
+        // read file
         const data = fs.readFileSync(path.resolve(__dirname, `../resources/${fileName}`), 'utf-8')
-        const strings = data.split(/\r?\n/)
-        strings.shift() // skip header
-        for (const str of strings) {
-            const employeeData = str.split(', ')
-            const employee = new Employee(employeeData[1], employeeData[0], employeeData[2], employeeData[3])
-            if (employee.isBirthday(xDate)) {
-                const recipient = employee.getEmail()
-                const body = 'Happy Birthday, dear %NAME%!'.replace('%NAME%', employee.getFirstName())
-                const subject = 'Happy Birthday!'
-                await this.sendMessage(smtpHost, smtpPort, 'sender@here.com', subject, body, recipient)
+        const split = data.split(/\r?\n/)
+
+        for (let i = 0; i < split.length; i++) {
+            const str = split[i];
+
+            // handle header
+            if (i === 0) {
+                continue
+            }
+
+            // parse csv record
+            const rec = str.split(', ')
+            const e = new Employee(rec[1], rec[0], rec[2], rec[3])
+
+            // check if we need to send a birthday message
+            if (e.isBirthday(xDate)) {
+                // actually send birthday email
+                const body = 'Happy Birthday, dear %NAME%!'.replace('%NAME%', e.getFirstName())
+                await this.sendMessage(smtpHost, smtpPort, 'sender@here.com', 'Happy Birthday!', body, e.getEmail())
             }
         }
     }
@@ -27,11 +37,11 @@ export class BirthdayService {
                       subject: string, body: string, recipient: string) {
 
         // create a mail transport
-        const options: SMTPTransport.Options = {host: smtpHost, port: smtpPort}
-        const transport = nodemailer.createTransport(options)
+        const o: SMTPTransport.Options = {host: smtpHost, port: smtpPort}
+        const t = nodemailer.createTransport(o)
 
         // construct the message
-        const message: Mail.Options = {
+        const msg: Mail.Options = {
             from: sender,
             to: [recipient],
             subject,
@@ -39,7 +49,7 @@ export class BirthdayService {
         }
 
         // send the message
-        await transport.sendMail(message)
+        await t.sendMail(msg)
     }
 
 }

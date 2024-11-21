@@ -1,5 +1,5 @@
 import { XDate } from '../src/XDate'
-import { BirthdayService } from '../src/BirthdayService'
+import {BirthdayService, MailService} from '../src/BirthdayService'
 import { messagesSent, startMailhog, stopMailHog } from './mailhog'
 import flushPromises from 'flush-promises'
 
@@ -20,7 +20,8 @@ describe('Acceptance', () => {
     })
 
     it('base scenario', async () => {
-        await service.sendGreetings('employee_data.txt', new XDate('2008/10/08'), SMTP_URL, SMTP_PORT)
+        const mailService = new MailService(SMTP_URL, SMTP_PORT)
+        await service.sendGreetings('employee_data.txt', new XDate('2008/10/08'), mailService)
         await flushPromises() // TODO still necessary?
 
         const messages = await messagesSent()
@@ -34,7 +35,8 @@ describe('Acceptance', () => {
     })
 
     it('will not send emails when nobodys birthday', async () => {
-        await service.sendGreetings('employee_data.txt', new XDate('2008/01/01'), SMTP_URL, SMTP_PORT)
+        const mailService = new MailService(SMTP_URL, SMTP_PORT)
+        await service.sendGreetings('employee_data.txt', new XDate('2008/01/01'), mailService)
         await flushPromises() // TODO still necessary?
 
         const messages = await messagesSent()

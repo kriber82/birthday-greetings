@@ -7,25 +7,16 @@ import SMTPTransport from "nodemailer/lib/smtp-transport";
 import Mail from "nodemailer/lib/mailer";
 
 export class BirthdayService {
-    async sendGreetings(employeeCsvFilename: string, today: XDate, smtpHost: string, smtpPort: number) {
-        const employeeCsvFileContent = fs.readFileSync(path.resolve(__dirname, `../resources/${employeeCsvFilename}`), 'utf-8')
-        const employeeCsvLinesWitHeader = employeeCsvFileContent.split(/\r?\n/)
-        const employeeCsvLinesWithoutHeader = employeeCsvLinesWitHeader.slice(1)
-
-        for (const employeeCsvLine of employeeCsvLinesWithoutHeader) {
-            const employee = this.parseEmployeeCsvLine(employeeCsvLine);
-            await this.sendMessageOnBirthday(employee, today, smtpHost, smtpPort);
-        }
+    async sendGreetings(employeeCsvFilename: string, today: XDate, mailService: MailService) {
+        const employees = this.parseEmployeeCsvFile(employeeCsvFilename);
+        await this.sendBirthdayGreetingsToEmployees(employees, today, mailService);
     }
 
-    private async sendMessageOnBirthday(employee: Employee, today: XDate, smtpHost: string, smtpPort: number) {
-        const shouldSendBirthdayMessage = employee.isBirthday(today);
-        if (shouldSendBirthdayMessage) {
-            const subject = 'Happy Birthday!';
-            const body = 'Happy Birthday, dear %NAME%!'.replace('%NAME%', employee.getFirstName())
-            const recipient = employee.getEmail();
-            await this.sendMessage(smtpHost, smtpPort, 'sender@here.com', subject, body, recipient)
-        }
+    private parseEmployeeCsvFile(employeeCsvFilename: string) {
+        const employeeCsvFileContent = fs.readFileSync(path.resolve(__dirname, `../resources/${employeeCsvFilename}`), 'utf-8')
+        const employeeCsvLinesWithHeader = employeeCsvFileContent.split(/\r?\n/)
+        const employeeCsvLinesWithoutHeader = employeeCsvLinesWithHeader.slice(1)
+        return employeeCsvLinesWithoutHeader.map((employeeCsvLine) => this.parseEmployeeCsvLine(employeeCsvLine));
     }
 
     private parseEmployeeCsvLine(csvLine: string) {
@@ -37,9 +28,34 @@ export class BirthdayService {
         return new Employee(firstName, lastName, birthDate, email);
     }
 
-    private async sendMessage(smtpHost: string, smtpPort: number, sender: string,
-                      subject: string, body: string, recipient: string) {
-        const options: SMTPTransport.Options = {host: smtpHost, port: smtpPort}
+    private async sendBirthdayGreetingsToEmployees(employees: Employee[], today: XDate, mailService: MailService) {
+        for (const employee of employees) {
+            if (employee.isBirthday(today)) {
+                await this.sendBirthdayMessage(employee, mailService);
+            }
+        }
+    }
+
+    private async sendBirthdayMessage(employee: Employee, mailService: MailService) {
+        const subject = 'Happy Birthday!';
+        const body = 'Happy Birthday, dear %NAME%!'.replace('%NAME%', employee.getFirstName())
+        const recipient = employee.getEmail();
+        await mailService.sendMessage('sender@here.com', subject, body, recipient)
+    }
+}
+
+
+export class MailService {
+    private readonly smtpHost: string;
+    private readonly smtpPort: number;
+
+    constructor(smtpHost: string, smtpPort: number) {
+        this.smtpHost = smtpHost;
+        this.smtpPort = smtpPort;
+    }
+
+    async sendMessage(sender: string, subject: string, body: string, recipient: string) {
+        const options: SMTPTransport.Options = {host: this.smtpHost, port: this.smtpPort}
         const transport = nodemailer.createTransport(options)
 
         const message: Mail.Options = {
@@ -51,5 +67,4 @@ export class BirthdayService {
 
         await transport.sendMail(message)
     }
-
 }
